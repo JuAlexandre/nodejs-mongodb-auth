@@ -29,22 +29,10 @@ module.exports = {
       );
       await connection.query(createUserRolesQuery);
 
-      // Find the user previously created with their roles
-      const findCreatedUserQuery = connection.format(
-        `SELECT users.*, group_concat(roles.name) AS roles
-        FROM users_roles
-        JOIN users ON users.id = users_roles.user_id
-        JOIN roles ON roles.id = users_roles.role_id
-        WHERE users.id = ?;`,
-        [result.insertId]
-      );
-      const [users] = await connection.query(findCreatedUserQuery);
-
-      // Format roles in array
-      const user = users[0];
-      user.roles = user.roles.split(',');
-
       await connection.commit();
+
+      // Find the user previously created with their roles
+      const user = await module.exports.findById(result.insertId);
 
       return user;
     } catch (error) {
@@ -52,6 +40,31 @@ module.exports = {
       throw error;
     } finally {
       await connection.release();
+    }
+  },
+
+  findById: async id => {
+    const connection = await db.getConnection();
+
+    try {
+      const sql = `SELECT users.*, group_concat(roles.name) AS roles
+                  FROM users_roles
+                  JOIN users ON users.id = users_roles.user_id
+                  JOIN roles ON roles.id = users_roles.role_id
+                  WHERE users.id = ?;`;
+      const [users] = await connection.query(sql, [id]);
+
+      if (users.length === 0) {
+        throw { message: 'not_found' };
+      }
+
+      // Format roles in array
+      const user = users[0];
+      user.roles = user.roles.split(',');
+
+      return user;
+    } catch (error) {
+      throw error;
     }
   }
 };
