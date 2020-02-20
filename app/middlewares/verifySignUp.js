@@ -7,12 +7,20 @@ module.exports = {
       return res.status(400).json({ message: 'No content provided...' });
     }
   
+    if (!Object.keys(req.body).includes('username')) {
+      return res.status(400).json({ message: 'The username field is missing...' });
+    }
+  
     if (!Object.keys(req.body).includes('email')) {
       return res.status(400).json({ message: 'The email field is missing...' });
     }
   
     if (!Object.keys(req.body).includes('password')) {
       return res.status(400).json({ message: 'The password field is missing...' });
+    }
+  
+    if (req.body.username.length === 0) {
+      return res.status(400).json({ message: 'The username field cannot be null...' });
     }
   
     if (req.body.email.length === 0) {
@@ -28,6 +36,20 @@ module.exports = {
     }
   
     next();
+  },
+  
+  checkDuplicateUsername: async (req, res, next) => {
+    try {
+      const users = await User.findByUsername(req.body.username);
+
+      if (users.length !== 0) {
+        return res.status(400).json({ message: 'This username is already in use!' });
+      }
+
+      next();
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
   },
   
   checkDuplicateEmail: async (req, res, next) => {

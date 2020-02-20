@@ -18,7 +18,12 @@ app.get('/', (req, res) => res.status(200).json({ message: 'Welcome to the appli
 
 app.post(
   '/signup',
-  [verifySignUp.checkRequestData, verifySignUp.checkDuplicateEmail, verifySignUp.checkRolesExisted],
+  [
+    verifySignUp.checkRequestData,
+    verifySignUp.checkDuplicateUsername,
+    verifySignUp.checkDuplicateEmail,
+    verifySignUp.checkRolesExisted
+  ],
   auth.signUp
 );
 
