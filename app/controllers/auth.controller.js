@@ -2,10 +2,13 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
 const User = require('../models/user.model');
+const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
+const validateEmail = require('../services/validateEmail');
 
 module.exports = {
   signUp: async (req, res) => {
     const newUser = {
+      username: capitalizeFirstLetter(req.body.username),
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
       roles:req.body.roles
@@ -21,7 +24,13 @@ module.exports = {
 
   signIn: async (req, res) => {
     try {
-      const users = await User.findByEmail(req.body.email);
+      let users = [];
+
+      if (validateEmail(req.body.login)) {
+        users = await User.findByEmail(req.body.login);
+      } else {
+        users = await User.findByUsername(req.body.login);
+      }
 
       if (users.length === 0) {
         return res.status(404).json({ message: 'No user found...' });
