@@ -9,8 +9,8 @@ module.exports = {
       
       // Create the user
       const createUserQuery = connection.format(
-        'INSERT INTO users (email, password) VALUES (?, ?);',
-        [newUser.email, newUser.password]
+        'INSERT INTO users (username, email, password) VALUES (?, ?, ?);',
+        [newUser.username, newUser.email, newUser.password]
       );
       const [result] = await connection.query(createUserQuery);
 
@@ -55,6 +55,32 @@ module.exports = {
         WHERE users.id = ?
         GROUP BY users.id;`,
         [id]
+      );
+      const [users] = await connection.query(query);
+
+      if (users.length !== 0) {
+        // Format roles in array for each users
+        users.forEach(user => user.roles = user.roles.split(','));
+      }
+
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  findByUsername: async username => {
+    const connection = await db.getConnection();
+
+    try {
+      const query = connection.format(
+        `SELECT users.*, group_concat(roles.name) AS roles
+        FROM users_roles
+        JOIN users ON users.id = users_roles.user_id
+        JOIN roles ON roles.id = users_roles.role_id
+        WHERE users.username = ?
+        GROUP BY users.id;`,
+        [username]
       );
       const [users] = await connection.query(query);
 
