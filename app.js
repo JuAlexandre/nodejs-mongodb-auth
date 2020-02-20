@@ -5,7 +5,6 @@ const cors = require('cors');
 
 const auth = require('./app/controllers/auth.controller');
 const verifySignUp = require('./app/middlewares/verifySignUp');
-const control = require('./app/middlewares/accessControl');
 
 const userRoutes = require('./app/routes/user.routes');
 const roleRoutes = require('./app/routes/role.routes');
