@@ -22,6 +22,8 @@ app.post(
   auth.signUp
 );
 
+app.post('/signin', auth.signIn);
+
 app.use('/users', userRoutes);
 app.use('/roles', roleRoutes);
 
