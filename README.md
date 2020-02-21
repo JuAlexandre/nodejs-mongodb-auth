@@ -18,6 +18,14 @@ CREATE TABLE users (
   password VARCHAR(255) NOT NULL
 ) ENGINE = InnoDB;
 
+CREATE TABLE profiles (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
+  user_id INT NOT NULL,
+  avatar VARCHAR(255),
+  first_name VARCHAR(100),
+  last_name VARCHAR(100)
+) ENGINE = InnoDB;
+
 CREATE TABLE users_roles (
 	id INT PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
     user_id INT NOT NULL,
@@ -32,10 +40,15 @@ CREATE TABLE roles (
 ALTER TABLE users_roles
 	ADD CONSTRAINT fk_users_roles__user_id
 		FOREIGN KEY (user_id)
-        REFERENCES users(id),
+		REFERENCES users(id),
 	ADD CONSTRAINT fk_users_roles__role_id
 		FOREIGN KEY (role_id)
-        REFERENCES roles(id);
+		REFERENCES roles(id);
+        
+ALTER TABLE profiles
+	ADD CONSTRAINT fk_profiles_user_id
+		FOREIGN KEY (user_id)
+        REFERENCES users(id);
 
 INSERT INTO roles(name) VALUES ('administrator');
 INSERT INTO roles(name) VALUES ('moderator');
