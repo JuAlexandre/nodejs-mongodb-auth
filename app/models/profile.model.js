@@ -14,6 +14,8 @@ module.exports = {
       return profiles[0];
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   },
 
@@ -26,6 +28,8 @@ module.exports = {
       return profiles;
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   },
 
@@ -38,6 +42,8 @@ module.exports = {
       return profiles;
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   },
 };

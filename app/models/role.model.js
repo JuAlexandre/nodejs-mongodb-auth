@@ -10,6 +10,8 @@ module.exports = {
       return roles;
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   }
 };
