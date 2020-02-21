@@ -61,7 +61,7 @@ cd nodejs-jwt-auth
 yarn install
 ```
 
-Copy and rename the .env.template file to .env and modify the database informations.
+Copy and rename the `.env.template` file to `.env` and modify the database informations.
 
 Launch the server:
 
