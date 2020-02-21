@@ -5,8 +5,8 @@ module.exports = {
     const connection = await db.getConnection();
 
     try {
-      const sql = 'SELECT * FROM roles;'
-      const [roles] = await connection.execute(sql);
+      const sql = 'SELECT * FROM roles;';
+      const [roles] = await connection.query(sql);
       return roles;
     } catch (error) {
       throw error;
