@@ -71,6 +71,8 @@ module.exports = {
       return users;
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   },
 
@@ -97,6 +99,8 @@ module.exports = {
       return users;
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   },
 
@@ -123,6 +127,8 @@ module.exports = {
       return users;
     } catch (error) {
       throw error;
+    } finally {
+      await connection.release();
     }
   }
 };
