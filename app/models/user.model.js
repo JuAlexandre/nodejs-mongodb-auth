@@ -1,5 +1,7 @@
 const db = require('../config/db.config').promise();
 
+const Profile = require('./profile.model');
+
 module.exports = {
   create: async newUser => {
     const connection = await db.getConnection();
@@ -30,6 +32,9 @@ module.exports = {
       await connection.query(createUserRolesQuery);
 
       await connection.commit();
+
+      // Create the user profil
+      await Profile.create(result.insertId);
 
       // Find the user previously created with their roles
       const users = await module.exports.findById(result.insertId);
