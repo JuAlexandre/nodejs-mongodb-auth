@@ -3,11 +3,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-const auth = require('./app/controllers/auth.controller');
-const verifySignUp = require('./app/middlewares/verifySignUp');
+const auth = require('./src/controllers/auth.controller');
+const verifySignUp = require('./src/middlewares/verifySignUp');
 
-const userRoutes = require('./app/routes/user.routes');
-const roleRoutes = require('./app/routes/role.routes');
+const userRoutes = require('./src/routes/user.routes');
+const roleRoutes = require('./src/routes/role.routes');
 
 const app = express();
 app.use(cors({ origin: '*' }));
