@@ -1,9 +1,9 @@
 {
-  "name": "nodejs-jwt-auth",
+  "name": "nodejs-mysql-auth",
   "version": "1.0.0",
-  "description": "Training project for the implementation of an authentication system with NodeJS, Express and JSONWebToken",
+  "description": "Training project for the implementation of an authentication system with NodeJS, MySQL, Express and JSONWebToken",
   "main": "index.js",
-  "repository": "https://github.com/JuAlexandre/nodejs-jwt-auth.git",
+  "repository": "https://github.com/JuAlexandre/nodejs-mysql-auth.git",
   "author": {
     "name": "Julien Alexandre",
     "email": "julien.alexandre26@gmail.com",
@@ -16,8 +16,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "dotenv": "^8.2.0",
-    "jest": "^25.1.0"
+    "dotenv": "^8.2.0"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
