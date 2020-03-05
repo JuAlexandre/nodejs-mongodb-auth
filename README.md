@@ -1,15 +1,15 @@
-# nodejs-jwt-auth
+# nodejs-mysql-auth
 
-Training project for the implementation of an authentication system with NodeJS, Express and JSONWebToken.
+Training project for the implementation of an authentication system with NodeJS, MySQL, Express and JSONWebToken.
 
 ## Installation
 
 Load this SQL script to set up the database:
 
 ```sql
-DROP DATABASE IF EXISTS `nodejs-jwt-auth`;
-CREATE DATABASE `nodejs-jwt-auth`;
-USE `nodejs-jwt-auth`;
+DROP DATABASE IF EXISTS `nodejs-mysql-auth`;
+CREATE DATABASE `nodejs-mysql-auth`;
+USE `nodejs-mysql-auth`;
 
 CREATE TABLE users (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
@@ -56,8 +56,8 @@ INSERT INTO roles(name) VALUES ('user');
 ```
 
 ```
-git clone https://github.com/JuAlexandre/nodejs-jwt-auth.git
-cd nodejs-jwt-auth
+git clone https://github.com/JuAlexandre/nodejs-mysql-auth.git
+cd nodejs-mysql-auth
 yarn install
 ```
 
