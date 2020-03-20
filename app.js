@@ -22,7 +22,9 @@ app.post(
     verifySignUp.checkRequestData,
     verifySignUp.checkDuplicateUsername,
     verifySignUp.checkDuplicateEmail,
-    verifySignUp.checkRolesExisted
+    verifySignUp.checkRolesExisted,
+    verifySignUp.checkEmail,
+    verifySignUp.checkPassword
   ],
   auth.signUp
 );
