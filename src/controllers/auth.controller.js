@@ -40,6 +40,9 @@ module.exports = {
         return res.status(401).json({ message: 'Invalid Password!' });
       }
 
+      // Remove password key from user object
+      delete users[0].password;
+
       const token = jwt.sign(
         { ...users[0] },
         process.env.SECRET,
