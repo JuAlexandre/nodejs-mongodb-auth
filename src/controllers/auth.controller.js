@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const randToken = require('rand-token');
 
 const User = require('../models/user.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
@@ -43,15 +44,43 @@ module.exports = {
       // Remove password key from user object
       delete users[0].password;
 
-      const token = jwt.sign(
-        { ...users[0] },
-        process.env.SECRET,
-        { expiresIn: 86400 /* 24 hours */ }
-      );
-  
-      return res.status(200).json({ token });
+      /* TTL: 24 hours */
+      const token = jwt.sign({ ...users[0] }, process.env.JWT_SECRET, { expiresIn: 86400 });
+      
+      const refreshToken = randToken.uid(256);
+      global.refreshTokens[refreshToken] = users[0].email;
+
+      return res.status(200).json({ token, refreshToken });
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
+  },
+
+  refreshAuth: async (req, res) => {
+    try {
+      const email = req.body.email;
+      const refreshToken = req.body.refreshToken;
+
+      if ((refreshToken in global.refreshTokens) && (global.refreshTokens[refreshToken] === email)) {
+        const users = await User.findByEmail(email);
+        delete users[0].password;
+        
+        /* TTL: 24 hours */
+        const token = jwt.sign({ ...users[0] }, process.env.JWT_SECRET, { expiresIn: 86400 });
+
+        return res.status(200).json({ token, refreshToken });
+      } else {
+        return res.status(401);
+      }
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  },
+
+  rejectRefreshToken: (req, res) => {
+    if(req.body.refreshToken in global.refreshTokens) { 
+      delete global.refreshTokens[req.body.refreshToken];
+    }
+    res.send(204);
   }
 };

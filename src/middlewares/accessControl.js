@@ -15,7 +15,7 @@ module.exports = {
       token = token.slice(7, token.length);
     }
 
-    jwt.verify(token, process.env.SECRET, (error, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
       if (error) {
         return res.status(401).json({ message: 'Unauthorized!' });
       }
