@@ -15,7 +15,10 @@ CREATE TABLE users (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
   username VARCHAR(255) NOT NULL UNIQUE,
   email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL
+  password VARCHAR(255) NOT NULL,
+  registered_at DATETIME NOT NULL,
+  last_connection_at DATETIME,
+  is_connected BOOLEAN NOT NULL
 ) ENGINE = InnoDB;
 
 CREATE TABLE profiles (

@@ -12,6 +12,9 @@ module.exports = {
       username: capitalizeFirstLetter(req.body.username),
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
+      isConnected: false,
+      registeredAt: new Date(),
+      lastConnectionAt: null,
       roles:req.body.roles
     };
 

@@ -11,8 +11,14 @@ module.exports = {
       
       // Create the user
       const createUserQuery = connection.format(
-        'INSERT INTO users (username, email, password) VALUES (?, ?, ?);',
-        [newUser.username, newUser.email, newUser.password]
+        'INSERT INTO users (username, email, password, is_connected, registered_at) VALUES (?, ?, ?, ?, ?);',
+        [
+          newUser.username,
+          newUser.email,
+          newUser.password,
+          newUser.isConnected,
+          newUser.registeredAt
+        ]
       );
       const [result] = await connection.query(createUserQuery);
 
