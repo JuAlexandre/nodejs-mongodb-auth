@@ -14,7 +14,7 @@ module.exports = {
       return res.status(400).json({ message: 'The username field is missing...' });
     }
 
-    if (!Object.keys(req.body).includes("email")) {
+    if (!Object.keys(req.body).includes('email')) {
       return res.status(400).json({ message: 'The email field is missing...' });
     }
 
@@ -34,7 +34,7 @@ module.exports = {
       return res.status(400).json({ message: 'The password field cannot be null...' });
     }
 
-    if (!Object.keys(req.body).includes("roles") || req.body.roles.length === 0) {
+    if (!Object.keys(req.body).includes('roles') || req.body.roles.length === 0) {
       req.body.roles = ['user'];
     }
 

@@ -6,19 +6,19 @@ const auth = require('../controllers/auth.controller');
 const router = express.Router();
 
 router.post(
-  '/signup',
+  '/sign-up',
   [
     verifySignUp.checkRequestData,
+    verifySignUp.checkEmail,
+    verifySignUp.checkPassword,
     verifySignUp.checkDuplicateUsername,
     verifySignUp.checkDuplicateEmail,
-    verifySignUp.checkRolesExisted,
-    verifySignUp.checkEmail,
-    verifySignUp.checkPassword
+    verifySignUp.checkRolesExisted
   ],
   auth.signUp
 );
 
-router.post('/signin', auth.signIn);
+router.post('/sign-in', auth.signIn);
 
 router.post('/refresh-auth', auth.refreshAuth);
 
