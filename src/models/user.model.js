@@ -8,19 +8,6 @@ module.exports = {
 
     try {
       await connection.beginTransaction();
-      
-      // Create the user
-      const createUserQuery = connection.format(
-        'INSERT INTO users (username, email, password, is_connected, registered_at) VALUES (?, ?, ?, ?, ?);',
-        [
-          newUser.username,
-          newUser.email,
-          newUser.password,
-          newUser.isConnected,
-          newUser.registeredAt
-        ]
-      );
-      const [result] = await connection.query(createUserQuery);
 
       // Find the list of requested roles
       const findRolesQuery = connection.format(
@@ -28,6 +15,16 @@ module.exports = {
         [newUser.roles]
       );
       const [roles] = await connection.query(findRolesQuery);
+
+      // Remove roles key from newUser object
+      delete newUser.roles;
+      
+      // Create the user
+      const createUserQuery = connection.format(
+        'INSERT INTO users SET ?;',
+        [newUser]
+      );
+      const [result] = await connection.query(createUserQuery);
 
       // Create the roles associated with the previously created user
       const userRolesIds = roles.map(role => [result.insertId, role.id]);
