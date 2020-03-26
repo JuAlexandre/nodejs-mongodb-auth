@@ -7,7 +7,7 @@ module.exports = {
     }
 
     try {
-      const users = await User.findById(req.params.id);
+      const users = await User.findBy('id', req.params.id);
 
       if (users.length === 0) {
         return res.status(404).json({ message: 'No user found...' });

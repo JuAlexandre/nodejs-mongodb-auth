@@ -40,7 +40,7 @@ module.exports = {
       await Profile.create(result.insertId);
 
       // Find the user previously created with their roles
-      const users = await module.exports.findById(result.insertId);
+      const users = await module.exports.findBy('id', result.insertId);
 
       return users[0];
     } catch (error) {
@@ -51,7 +51,7 @@ module.exports = {
     }
   },
 
-  findById: async id => {
+  findBy: async (field, value) => {
     const connection = await db.getConnection();
 
     try {
@@ -60,65 +60,9 @@ module.exports = {
         FROM users_roles
         JOIN users ON users.id = users_roles.user_id
         JOIN roles ON roles.id = users_roles.role_id
-        WHERE users.id = ?
+        WHERE users.?? = ?
         GROUP BY users.id;`,
-        [id]
-      );
-      const [users] = await connection.query(query);
-
-      if (users.length !== 0) {
-        // Format roles in array for each users
-        users.forEach(user => user.roles = user.roles.split(','));
-      }
-
-      return users;
-    } catch (error) {
-      throw error;
-    } finally {
-      await connection.release();
-    }
-  },
-
-  findByUsername: async username => {
-    const connection = await db.getConnection();
-
-    try {
-      const query = connection.format(
-        `SELECT users.*, group_concat(roles.name) AS roles
-        FROM users_roles
-        JOIN users ON users.id = users_roles.user_id
-        JOIN roles ON roles.id = users_roles.role_id
-        WHERE users.username = ?
-        GROUP BY users.id;`,
-        [username]
-      );
-      const [users] = await connection.query(query);
-
-      if (users.length !== 0) {
-        // Format roles in array for each users
-        users.forEach(user => user.roles = user.roles.split(','));
-      }
-
-      return users;
-    } catch (error) {
-      throw error;
-    } finally {
-      await connection.release();
-    }
-  },
-
-  findByEmail: async email => {
-    const connection = await db.getConnection();
-
-    try {
-      const query = connection.format(
-        `SELECT users.*, group_concat(roles.name) AS roles
-        FROM users_roles
-        JOIN users ON users.id = users_roles.user_id
-        JOIN roles ON roles.id = users_roles.role_id
-        WHERE users.email = ?
-        GROUP BY users.id;`,
-        [email]
+        [field, value]
       );
       const [users] = await connection.query(query);
 

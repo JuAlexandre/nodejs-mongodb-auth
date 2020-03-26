@@ -28,13 +28,10 @@ module.exports = {
 
   signIn: async (req, res) => {
     try {
-      let users = [];
-
-      if (validateEmail(req.body.login)) {
-        users = await User.findByEmail(req.body.login);
-      } else {
-        users = await User.findByUsername(req.body.login);
-      }
+      const users = await User.findBy(
+        validateEmail(req.body.login) ? 'email' : 'username',
+        req.body.login
+      );
 
       if (users.length === 0) {
         return res.status(404).json({ message: 'No user found...' });
@@ -65,7 +62,7 @@ module.exports = {
       const refreshToken = req.body.refreshToken;
 
       if ((refreshToken in global.refreshTokens) && (global.refreshTokens[refreshToken] === email)) {
-        const users = await User.findByEmail(email);
+        const users = await User.findBy('email', email);
         delete users[0].password;
         
         /* TTL: 24 hours */

@@ -43,7 +43,7 @@ module.exports = {
 
   checkDuplicateUsername: async (req, res, next) => {
     try {
-      const users = await User.findByUsername(req.body.username);
+      const users = await User.findBy('username', req.body.username);
 
       if (users.length !== 0) {
         return res.status(400).json({ message: 'This username is already in use!' });
@@ -57,7 +57,7 @@ module.exports = {
 
   checkDuplicateEmail: async (req, res, next) => {
     try {
-      const users = await User.findByEmail(req.body.email);
+      const users = await User.findBy('email', req.body.email);
 
       if (users.length !== 0) {
         return res.status(400).json({ message: 'This email is already in use!' });
