@@ -8,7 +8,7 @@ const router = express.Router();
 router.post(
   '/sign-up',
   [
-    verifySignUp.checkRequestData,
+    verifySignUp.checkRequestBody,
     verifySignUp.checkEmail,
     verifySignUp.checkPassword,
     verifySignUp.checkDuplicateUsername,

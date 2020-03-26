@@ -3,26 +3,22 @@ const db = require('../config/db.config').promise();
 const Profile = require('./profile.model');
 
 module.exports = {
-  create: async newUser => {
+  create: async user => {
     const connection = await db.getConnection();
 
     try {
       await connection.beginTransaction();
 
-      // Find the list of requested roles
-      const findRolesQuery = connection.format(
-        'SELECT * FROM roles WHERE name IN (?);',
-        [newUser.roles]
-      );
-      const [roles] = await connection.query(findRolesQuery);
+      // Save user roles before deleting
+      const roles = user.roles;
 
-      // Remove roles key from newUser object
-      delete newUser.roles;
+      // Remove roles key from user object
+      delete user.roles;
       
       // Create the user
       const createUserQuery = connection.format(
         'INSERT INTO users SET ?;',
-        [newUser]
+        [user]
       );
       const [result] = await connection.query(createUserQuery);
 
