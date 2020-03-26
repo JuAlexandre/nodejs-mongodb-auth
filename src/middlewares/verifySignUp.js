@@ -46,7 +46,7 @@ module.exports = {
       const users = await User.findBy('username', req.body.username);
 
       if (users.length !== 0) {
-        return res.status(400).json({ message: 'This username is already in use!' });
+        return res.status(400).json({ message: 'This username is already used!' });
       }
 
       next();
@@ -60,7 +60,7 @@ module.exports = {
       const users = await User.findBy('email', req.body.email);
 
       if (users.length !== 0) {
-        return res.status(400).json({ message: 'This email is already in use!' });
+        return res.status(400).json({ message: 'This email is already used!' });
       }
 
       next();
