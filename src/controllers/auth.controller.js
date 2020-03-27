@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const randToken = require('rand-token');
 
+const { registrationTokenExpirationDelay } = require ('../config/signUp.config');
+const mailer = require ('../config/transport.config');
+
 const User = require('../models/user.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
 const validateEmail = require('../services/validateEmail');
@@ -12,18 +15,47 @@ module.exports = {
       username: capitalizeFirstLetter(req.body.username),
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
-      is_connected: false,
+      roles:req.body.roles,
       registered_at: new Date(),
-      last_connection_at: null,
-      roles:req.body.roles
+      registration_token: randToken.uid(255),
+      registration_token_expiration_at: new Date(new Date().setMinutes(new Date().getMinutes() + registrationTokenExpirationDelay)),
     };
 
     try {
       const user = await User.create(newUser);
+
+      const activeAccountLink = `${process.env.HOST}:${process.env.PORT}/active-account?token=${user.registration_token}`;
+      const content = `<h2>Yggdrasil App</h2><p>Click <a href="${activeAccountLink}">here</a> to active your account:</p>`;
+
+      await mailer.sendMail({
+        to: user.email,
+        subject: 'Confirm your account ⏳', 
+        html: content
+      });
+
       return res.status(201).json(user);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
+  },
+
+  activeAccount: async (req, res) => {
+    const users = await User.findBy('registration_token', req.query.token);
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No user found...' });
+    }
+
+    if (new Date() > users[0].registration_token_expiration_at) {
+      return res.status(404).json({ message: 'The link is no longer valid...' });
+    }
+
+    await User.update(
+      users[0].id,
+      { registration_token: null, registration_token_expiration_at: null }
+    );
+
+    return res.status(200).json({ message: 'Your account is activated!' });
   },
 
   signIn: async (req, res) => {

@@ -9,8 +9,12 @@ module.exports = {
     try {
       await connection.beginTransaction();
 
-      // Save user roles before deleting
-      const roles = user.roles;
+      // Find the list of requested roles
+      const findRolesQuery = connection.format(
+        'SELECT * FROM roles WHERE name IN (?);',
+        [user.roles]
+      );
+      const [roles] = await connection.query(findRolesQuery);
 
       // Remove roles key from user object
       delete user.roles;
@@ -68,6 +72,29 @@ module.exports = {
       }
 
       return users;
+    } catch (error) {
+      throw error;
+    } finally {
+      await connection.release();
+    }
+  },
+
+  update: async (id, data) => {
+    const connection = await db.getConnection();
+
+    try {
+      const query = connection.format(
+        `UPDATE users SET ? WHERE id = ?`,
+        [data, id]
+      );
+      const [result] = await connection.query(query);
+
+      console.log('result', result);
+
+      // Find the user previously created with their roles
+      const users = await module.exports.findBy('id', id);
+
+      return users[0];
     } catch (error) {
       throw error;
     } finally {
