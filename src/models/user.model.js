@@ -87,9 +87,7 @@ module.exports = {
         `UPDATE users SET ? WHERE id = ?`,
         [data, id]
       );
-      const [result] = await connection.query(query);
-
-      console.log('result', result);
+      await connection.query(query);
 
       // Find the user previously created with their roles
       const users = await module.exports.findBy('id', id);
