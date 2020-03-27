@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const randToken = require('rand-token');
 
+const { registrationTokenExpirationDelay } = require ('../config/signUp.config');
+
 const User = require('../models/user.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
 const validateEmail = require('../services/validateEmail');
@@ -12,10 +14,10 @@ module.exports = {
       username: capitalizeFirstLetter(req.body.username),
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
-      is_connected: false,
+      roles:req.body.roles,
       registered_at: new Date(),
-      last_connection_at: null,
-      roles:req.body.roles
+      registration_token: randToken.uid(255),
+      registration_token_expiration_at: new Date(new Date().setMinutes(new Date().getMinutes() + registrationTokenExpirationDelay)),
     };
 
     try {

@@ -17,8 +17,10 @@ CREATE TABLE users (
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   registered_at DATETIME NOT NULL,
-  last_connection_at DATETIME,
-  is_connected BOOLEAN NOT NULL
+  registration_token VARCHAR(255),
+  registration_token_expiration_at DATETIME,
+  reset_password_token VARCHAR(255),
+  reset_password_token_expiration_at DATETIME
 ) ENGINE = InnoDB;
 
 CREATE TABLE profiles (

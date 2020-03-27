@@ -9,8 +9,12 @@ module.exports = {
     try {
       await connection.beginTransaction();
 
-      // Save user roles before deleting
-      const roles = user.roles;
+      // Find the list of requested roles
+      const findRolesQuery = connection.format(
+        'SELECT * FROM roles WHERE name IN (?);',
+        [user.roles]
+      );
+      const [roles] = await connection.query(findRolesQuery);
 
       // Remove roles key from user object
       delete user.roles;
