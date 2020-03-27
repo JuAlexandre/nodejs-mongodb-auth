@@ -9,4 +9,6 @@ router.use('/:id', profileRoutes);
 
 router.get('/:id', user.findById);
 
+router.put('/:id', user.update)
+
 module.exports = router;

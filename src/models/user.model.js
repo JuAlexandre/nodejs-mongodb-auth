@@ -77,5 +77,28 @@ module.exports = {
     } finally {
       await connection.release();
     }
+  },
+
+  update: async (id, data) => {
+    const connection = await db.getConnection();
+
+    try {
+      const query = connection.format(
+        `UPDATE users SET ? WHERE id = ?`,
+        [data, id]
+      );
+      const [result] = await connection.query(query);
+
+      console.log('result', result);
+
+      // Find the user previously created with their roles
+      const users = await module.exports.findBy('id', id);
+
+      return users[0];
+    } catch (error) {
+      throw error;
+    } finally {
+      await connection.release();
+    }
   }
 };

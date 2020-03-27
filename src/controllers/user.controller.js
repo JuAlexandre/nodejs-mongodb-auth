@@ -17,5 +17,15 @@ module.exports = {
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
+  },
+
+  update: async (req, res) => {
+    try {
+      const user = await User.update(req.params.id, req.body);
+
+      return res.status(200).json(user);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
   }
 };
