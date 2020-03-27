@@ -20,6 +20,8 @@ router.post(
 
 router.post('/sign-in', auth.signIn);
 
+router.get('/active-account', auth.activeAccount);
+
 router.post('/refresh-auth', auth.refreshAuth);
 
 router.post('/reject-refresh-token', auth.rejectRefreshToken);

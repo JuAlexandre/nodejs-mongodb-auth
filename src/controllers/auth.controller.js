@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const randToken = require('rand-token');
 
 const { registrationTokenExpirationDelay } = require ('../config/signUp.config');
+const mailer = require ('../config/transport.config');
 
 const User = require('../models/user.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
@@ -22,10 +23,43 @@ module.exports = {
 
     try {
       const user = await User.create(newUser);
+
+      const activeAccountLink = `${process.env.HOST}:${process.env.PORT}/active-account?token=${user.registration_token}`
+
+      const response = await mailer.sendMail({
+        from: '"Yggdrasil 🌲" <yggdrasil@gmail.com>',
+        to: user.email,
+        subject: "Confirm your account ⏳", 
+        html:
+          `<h2>Yggdrasil App</h2>
+          <p>Click <a href="${activeAccountLink}">here</a> to active your account:</p>`
+      });
+
+      // TODO: Manage error if email is'nt send but user in created
+      console.log(response);
+
       return res.status(201).json(user);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
+  },
+
+  activeAccount: async (req, res) => {
+    const token = req.query.token;
+
+    const users = await User.findBy('registration_token', token);
+
+    if (users.length === 0) {
+      return res.status(404).json({ message: 'No user found...' });
+    }
+
+    if (new Date() > users[0].registration_token_expiration_at) {
+      return res.status(404).json({ message: 'The link is no longer valid...' });
+    }
+
+    // TODO: Update user by remove registration_token and registration_token_expiration_at
+
+    return res.status(200).json({ message: 'Your account is activated!' });
   },
 
   signIn: async (req, res) => {
