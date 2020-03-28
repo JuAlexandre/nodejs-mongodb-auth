@@ -25,7 +25,7 @@ module.exports = {
       const user = await User.create(newUser);
 
       const activeAccountLink = `${process.env.HOST}:${process.env.PORT}/active-account?token=${user.registration_token}`;
-      const content = `<h2>Yggdrasil App</h2><p>Click <a href="${activeAccountLink}">here</a> to active your account:</p>`;
+      const content = `<h2>nodejs-mysql-auth</h2><p>Click <a href="${activeAccountLink}">here</a> to active your account:</p>`;
 
       await mailer.sendMail({
         to: user.email,
