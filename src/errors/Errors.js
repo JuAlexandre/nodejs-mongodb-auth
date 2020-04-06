@@ -62,7 +62,7 @@ module.exports = {
     placement: 'field',
     message: 'This resource already exists in the database'
   },
-  INTERNAL_ERROR: {
+  INTERNAL: {
     statusCode: 500,
     code: 5001,
     type: 'internalServer',

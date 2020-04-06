@@ -18,8 +18,6 @@ module.exports = {
       password: bcrypt.hashSync(req.body.password, 8),
       roles:req.body.roles,
       registered_at: new Date(),
-      registration_token: randToken.uid(255),
-      registration_token_expiration_at: new Date(new Date().setMinutes(new Date().getMinutes() + 60))
     };
 
     try {

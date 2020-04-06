@@ -1,13 +1,13 @@
 /**
  * Error Handler
  * @param {number} statusCode - Error HTTP code
- * @param {Object[]} errors - Errors list
+ * @param {Object} error - Error
  */
 class ErrorHandler extends Error {
-  constructor(statusCode, errors) {
+  constructor(statusCode, error) {
     super();
     this.statusCode = statusCode;
-    this.errors = errors;
+    this.error = error;
   }
 };
 
