@@ -20,7 +20,8 @@ router.post(
   auth.signUp
 );
 
-router.post('/sign-in',
+router.post(
+  '/sign-in',
   [
     verifySignIn.checkMissingFields,
     verifySignIn.checkEmptyFields,
