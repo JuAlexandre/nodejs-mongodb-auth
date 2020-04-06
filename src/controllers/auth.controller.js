@@ -2,15 +2,16 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const randToken = require('rand-token');
 
-const { registrationTokenExpirationDelay } = require ('../config/signUp.config');
-const mailer = require ('../config/transport.config');
+const { BAD_REQUEST, INTERNAL, UNAUTHORIZED } = require('../config/errors');
+
+const ErrorHandler = require('../errors/ErrorHandler');
+const GeneralError = require('../errors/GeneralError');
 
 const User = require('../models/user.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
-const validateEmail = require('../services/validateEmail');
 
 module.exports = {
-  signUp: async (req, res) => {
+  signUp: async (req, res, next) => {
     const newUser = {
       username: capitalizeFirstLetter(req.body.username),
       email: req.body.email,
@@ -18,59 +19,27 @@ module.exports = {
       roles:req.body.roles,
       registered_at: new Date(),
       registration_token: randToken.uid(255),
-      registration_token_expiration_at: new Date(new Date().setMinutes(new Date().getMinutes() + registrationTokenExpirationDelay)),
+      registration_token_expiration_at: new Date(new Date().setMinutes(new Date().getMinutes() + 60))
     };
 
     try {
       const user = await User.create(newUser);
-
-      const activeAccountLink = `${process.env.HOST}:${process.env.PORT}/active-account?token=${user.registration_token}`;
-      const content = `<h2>nodejs-mysql-auth</h2><p>Click <a href="${activeAccountLink}">here</a> to active your account:</p>`;
-
-      await mailer.sendMail({
-        to: user.email,
-        subject: 'Confirm your account ⏳', 
-        html: content
-      });
-
       return res.status(201).json(user);
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(new ErrorHandler(500, new GeneralError(INTERNAL, error.message)));
     }
   },
 
-  activeAccount: async (req, res) => {
-    const users = await User.findBy('registration_token', req.query.token);
-
-    if (users.length === 0) {
-      return res.status(404).json({ message: 'No user found...' });
-    }
-
-    if (new Date() > users[0].registration_token_expiration_at) {
-      return res.status(404).json({ message: 'The link is no longer valid...' });
-    }
-
-    await User.update(
-      users[0].id,
-      { registration_token: null, registration_token_expiration_at: null }
-    );
-
-    return res.status(200).json({ message: 'Your account is activated!' });
-  },
-
-  signIn: async (req, res) => {
+  signIn: async (req, res, next) => {
     try {
-      const users = await User.findBy(
-        validateEmail(req.body.login) ? 'email' : 'username',
-        req.body.login
-      );
+      const users = await User.findBy('email', req.body.email);
 
       if (users.length === 0) {
-        return res.status(404).json({ message: 'No user found...' });
+        throw new GeneralError(BAD_REQUEST, 'No account corresponds to this email address');
       }
 
       if (!bcrypt.compareSync(req.body.password, users[0].password)) {
-        return res.status(401).json({ message: 'Invalid Password!' });
+        throw new GeneralError(UNAUTHORIZED, 'Email address or password invalid');
       }
 
       // Remove password key from user object
@@ -84,11 +53,11 @@ module.exports = {
 
       return res.status(200).json({ token, refreshToken });
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(new ErrorHandler(error.statusCode, error));
     }
   },
 
-  refreshAuth: async (req, res) => {
+  refreshAuth: async (req, res, next) => {
     try {
       const email = req.body.email;
       const refreshToken = req.body.refreshToken;
@@ -105,14 +74,18 @@ module.exports = {
         return res.status(401);
       }
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(new ErrorHandler(500, new GeneralError(INTERNAL, error.message)));
     }
   },
 
-  rejectRefreshToken: (req, res) => {
-    if(req.body.refreshToken in global.refreshTokens) { 
-      delete global.refreshTokens[req.body.refreshToken];
+  rejectRefreshToken: (req, res, next) => {
+    try {
+      if(req.body.refreshToken in global.refreshTokens) { 
+        delete global.refreshTokens[req.body.refreshToken];
+      }
+      res.send(200);
+    } catch (error) {
+      next(new ErrorHandler(500, new GeneralError(INTERNAL, error.message)));
     }
-    res.send(204);
   }
 };
