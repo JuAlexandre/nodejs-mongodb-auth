@@ -1,6 +1,6 @@
 const User = require('../models/user.model');
 
-const { BAD_REQUEST, INTERNAL } = require('../config/errors');
+const { BAD_REQUEST, INTERNAL } = require('../errors/Errors');
 
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');

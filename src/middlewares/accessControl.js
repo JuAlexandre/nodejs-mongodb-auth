@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user.model');
 
-const { FORBIDDEN, UNAUTHORIZED } = require('../config/errors');
+const { FORBIDDEN, UNAUTHORIZED } = require('../errors/Errors');
 
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');

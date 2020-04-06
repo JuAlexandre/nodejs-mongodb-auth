@@ -1,4 +1,4 @@
-const { BAD_REQUEST, REQUIRED, INVALID } = require('../config/errors');
+const { BAD_REQUEST, REQUIRED, INVALID } = require('../errors/Errors');
 
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');

@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const randToken = require('rand-token');
 
-const { BAD_REQUEST, INTERNAL, UNAUTHORIZED } = require('../config/errors');
+const { BAD_REQUEST, INTERNAL, UNAUTHORIZED } = require('../errors/Errors');
 
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');

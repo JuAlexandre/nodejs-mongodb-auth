@@ -1,6 +1,6 @@
 const Role = require('../models/role.model');
 
-const { INTERNAL } = require('../config/errors');
+const { INTERNAL } = require('../errors/Errors');
 
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');

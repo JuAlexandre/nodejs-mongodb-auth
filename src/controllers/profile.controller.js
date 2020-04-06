@@ -1,6 +1,6 @@
 const Profile = require('../models/profile.model');
 
-const { BAD_REQUEST } = require('../config/errors');
+const { BAD_REQUEST } = require('../errors/Errors');
 
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');
