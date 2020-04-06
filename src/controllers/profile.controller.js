@@ -1,21 +1,22 @@
 const Profile = require('../models/profile.model');
 
-module.exports = {
-  findByUserId: async (req, res) => {
-    if (isNaN(req.params.id)) {
-      return res.status(400).json({ message: 'The supplied parameter is not a number...' });
-    }
+const { BAD_REQUEST } = require('../errors/Errors');
 
+const ErrorHandler = require('../errors/ErrorHandler');
+const GeneralError = require('../errors/GeneralError');
+
+module.exports = {
+  findByUserId: async (req, res, next) => {
     try {
       const profiles = await Profile.findByUserId(req.params.id);
 
       if (profiles.length === 0) {
-        return res.status(404).json({ message: 'No profile found...' });
+        throw new GeneralError(BAD_REQUEST);
       }
 
       return res.status(200).json(profiles[0]);
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(new ErrorHandler(500, error));
     }
   }
 };

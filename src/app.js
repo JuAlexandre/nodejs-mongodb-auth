@@ -20,4 +20,6 @@ app.use('/', authRoutes);
 app.use('/users', userRoutes);
 app.use('/roles', roleRoutes);
 
+app.use(({statusCode, errors}, req, res, next) => res.status(statusCode).json(errors));
+
 module.exports = app;

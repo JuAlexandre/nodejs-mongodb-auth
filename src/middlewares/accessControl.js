@@ -2,26 +2,35 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user.model');
 
+const { FORBIDDEN, UNAUTHORIZED } = require('../errors/Errors');
+
+const ErrorHandler = require('../errors/ErrorHandler');
+const GeneralError = require('../errors/GeneralError');
+
 module.exports = {
   verifyToken: (req, res, next) => {
-    let token = req.headers['authorization'];
+    try {
+      let token = req.headers['authorization'];
 
-    if (!token) {
-      return res.status(403).json({ message: 'No token provided!' });
-    }
-
-    if (token.startsWith('Bearer ')) {
-      // Remove Bearer from string
-      token = token.slice(7, token.length);
-    }
-
-    jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
-      if (error) {
-        return res.status(401).json({ message: 'Unauthorized!' });
+      if (!token) {
+        throw new GeneralError(FORBIDDEN, 'No token provided!');
       }
-      req.userId = decoded.id;
-      next();
-    });
+
+      if (token.startsWith('Bearer ')) {
+        // Remove Bearer from string
+        token = token.slice(7, token.length);
+      }
+
+      jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+        if (error) {
+          throw new GeneralError(UNAUTHORIZED);
+        }
+        req.userId = decoded.id;
+        next();
+      });
+    } catch (error) {
+      next(new ErrorHandler(error.statusCode, error));
+    }
   },
 
   isAdmin: async (req, res, next) => {
@@ -29,16 +38,16 @@ module.exports = {
       const users = await User.findById(req.userId);
 
       if (users.length === 0) {
-        return res.status(404).json({ message: 'No user found...' });
+        throw new GeneralError(BAD_REQUEST, 'No account find');
       }
 
       if (!users[0].roles.includes('administrator')) {
-        return res.status(401).json({ message: 'Require Administrator permission!' });
+        throw new GeneralError(UNAUTHORIZED, 'Require Administrator permission');
       }
 
       next();
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(new ErrorHandler(error.statusCode, error));
     }
   },
   
@@ -47,16 +56,16 @@ module.exports = {
       const users = await User.findById(req.userId);
 
       if (users.length === 0) {
-        return res.status(404).json({ message: 'No user found...' });
+        throw new GeneralError(BAD_REQUEST, 'No account find');
       }
 
       if (!users[0].roles.includes('moderator')) {
-        return res.status(401).json({ message: 'Require Moderator permission!' });
+        throw new GeneralError(UNAUTHORIZED, 'Require Moderator permission');
       }
 
       next();
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(new ErrorHandler(error.statusCode, error));
     }
   }
 };
