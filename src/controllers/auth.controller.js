@@ -8,6 +8,7 @@ const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');
 
 const User = require('../models/user.model');
+const Profile = require('../models/profile.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
 
 module.exports = {
@@ -40,11 +41,19 @@ module.exports = {
         throw new GeneralError(UNAUTHORIZED, 'Email address or password invalid');
       }
 
-      // Remove password key from user object
+      const profiles = await Profile.findBy('user_id', users[0].id);
+
+      if (profiles.length === 0) {
+        throw new GeneralError(BAD_REQUEST, 'No profile corresponds to this email address');
+      }
+
+      // Remove keys from user object
       delete users[0].password;
+      delete users[0].reset_password_token;
+      delete users[0].reset_password_token_expiration_at;
 
       /* TTL: 24 hours */
-      const token = jwt.sign({ ...users[0] }, process.env.JWT_SECRET, { expiresIn: 86400 });
+      const token = jwt.sign({ ...users[0], profile: profiles[0] }, process.env.JWT_SECRET, { expiresIn: 86400 });
       
       const refreshToken = randToken.uid(256);
       global.refreshTokens[refreshToken] = users[0].email;

@@ -5,11 +5,14 @@ module.exports = {
     const connection = await db.getConnection();
 
     try {
-      const query = connection.format('INSERT INTO profiles (user_id) VALUES (?);', [userId]);
+      const query = connection.format(
+        'INSERT INTO profiles (user_id) VALUES (?);',
+        [userId]
+      );
       const [result] = await connection.query(query);
 
       // Find the profil previously created
-      const profiles = await module.exports.findById(result.insertId);
+      const profiles = await module.exports.findBy('id', result.insertId);
 
       return profiles[0];
     } catch (error) {
@@ -19,11 +22,14 @@ module.exports = {
     }
   },
 
-  findById: async id => {
+  findBy: async (field, value) => {
     const connection = await db.getConnection();
 
     try {
-      const query = connection.format('SELECT * FROM profiles WHERE id = ? GROUP BY id;', [id]);
+      const query = connection.format(
+        'SELECT * FROM profiles WHERE ?? = ? GROUP BY id;',
+        [field, value]
+      );
       const [profiles] = await connection.query(query);
       return profiles;
     } catch (error) {
@@ -31,19 +37,5 @@ module.exports = {
     } finally {
       await connection.release();
     }
-  },
-
-  findByUserId: async id => {
-    const connection = await db.getConnection();
-
-    try {
-      const query = connection.format('SELECT * FROM profiles WHERE user_id = ? GROUP BY id;', [id]);
-      const [profiles] = await connection.query(query);
-      return profiles;
-    } catch (error) {
-      throw error;
-    } finally {
-      await connection.release();
-    }
-  },
+  }
 };

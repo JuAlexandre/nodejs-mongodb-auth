@@ -8,7 +8,7 @@ const GeneralError = require('../errors/GeneralError');
 module.exports = {
   findByUserId: async (req, res, next) => {
     try {
-      const profiles = await Profile.findByUserId(req.params.id);
+      const profiles = await Profile.findBy('user_id', req.params.id);
 
       if (profiles.length === 0) {
         throw new GeneralError(BAD_REQUEST);
