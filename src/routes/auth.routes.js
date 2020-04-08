@@ -30,6 +30,10 @@ router.post(
   auth.signIn
 );
 
+router.post('/forget-password', auth.forgetPassword);
+
+router.post('/reset-password', auth.resetPassword);
+
 router.post('/refresh-auth', auth.refreshAuth);
 
 router.post('/reject-refresh-token', auth.rejectRefreshToken);
