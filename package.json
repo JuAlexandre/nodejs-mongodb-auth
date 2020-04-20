@@ -1,9 +1,9 @@
 {
-  "name": "nodejs-mysql-auth",
+  "name": "nodejs-mongodb-auth",
   "version": "1.0.0",
-  "description": "Training project for the implementation of an authentication system with NodeJS, MySQL, Express and JSONWebToken",
+  "description": "Training project for the implementation of an authentication system with NodeJS, MongoDB, Express and JSONWebToken",
   "main": "index.js",
-  "repository": "https://github.com/JuAlexandre/nodejs-mysql-auth.git",
+  "repository": "https://github.com/JuAlexandre/nodejs-mongodb-auth.git",
   "author": {
     "name": "Julien Alexandre",
     "email": "julien.alexandre26@gmail.com",
