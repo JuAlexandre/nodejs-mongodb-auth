@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const randToken = require('rand-token');
 
+const { User, Role, Profile } = require('../config/db.config');
 const transport = require('../config/smtp.config');
 
 const { BAD_REQUEST, INTERNAL, UNAUTHORIZED } = require('../errors/Errors');
@@ -9,22 +10,29 @@ const { BAD_REQUEST, INTERNAL, UNAUTHORIZED } = require('../errors/Errors');
 const ErrorHandler = require('../errors/ErrorHandler');
 const GeneralError = require('../errors/GeneralError');
 
-const User = require('../models/user.model');
-const Profile = require('../models/profile.model');
 const capitalizeFirstLetter = require('../services/capitalizeFirstLetter');
 
 module.exports = {
   signUp: async (req, res, next) => {
-    const newUser = {
-      username: capitalizeFirstLetter(req.body.username),
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 8),
-      roles:req.body.roles,
-      registered_at: new Date(),
-    };
-
     try {
-      const user = await User.create(newUser);
+      const roles = await Role.find({ name: { '$in' : req.body.roles } });
+
+      const profile = await new Profile({
+        avatar: null,
+        firstName: null,
+        lastName: null
+      }).save();
+
+      const newUser = new User({
+        username: capitalizeFirstLetter(req.body.username),
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, 8),
+        profile,
+        roles
+      });
+
+      const user = await newUser.save();
+      delete user.password;
       return res.status(201).json(user);
     } catch (error) {
       next(new ErrorHandler(500, new GeneralError(INTERNAL, error.message)));
@@ -33,100 +41,96 @@ module.exports = {
 
   signIn: async (req, res, next) => {
     try {
-      const users = await User.findBy('email', req.body.email);
+      const user = await User.findOne({ email: req.body.email }).populate('roles').populate('profile');
 
-      if (users.length === 0) {
+      if (!user) {
         throw new GeneralError(BAD_REQUEST, 'No account corresponds to this email address');
       }
 
-      if (!bcrypt.compareSync(req.body.password, users[0].password)) {
+      if (!bcrypt.compareSync(req.body.password, user.password)) {
         throw new GeneralError(UNAUTHORIZED, 'Email address or password invalid');
       }
 
-      const profiles = await Profile.findBy('user_id', users[0].id);
-
-      if (profiles.length === 0) {
-        throw new GeneralError(BAD_REQUEST, 'No profile corresponds to this email address');
-      }
-
       // Remove keys from user object
-      delete users[0].password;
-      delete users[0].reset_password_token;
-      delete users[0].reset_password_token_expiration_at;
+      delete user.password;
 
       /* TTL: 24 hours */
-      const token = jwt.sign({ ...users[0], profile: profiles[0] }, process.env.JWT_SECRET, { expiresIn: 86400 });
+      const token = jwt.sign({ ...user }, process.env.JWT_SECRET, { expiresIn: 86400 });
       
       const refreshToken = randToken.uid(256);
-      global.refreshTokens[refreshToken] = users[0].email;
+      global.refreshTokens[refreshToken] = user.email;
 
       return res.status(200).json({ token, refreshToken });
     } catch (error) {
+      console.log(error)
       next(new ErrorHandler(error.statusCode, error));
     }
   },
 
   forgetPassword: async (req, res, next) => {
     try {
-      const users = await User.findBy('email', req.body.email);
+      const user = await User.findOne({ email: req.body.email }).populate('roles').populate('profile');
 
-      if (users.length === 0) {
+      if (!user) {
         throw new GeneralError(BAD_REQUEST, 'No account corresponds to this email address');
       }
 
       const resetPasswordToken = randToken.uid(250);
       const expirationDate = new Date(new Date().setMinutes(new Date().getMinutes() + 30));
 
-      await User.update(
-        users[0].id, 
+      await User.findByIdAndUpdate(
+        user._id, 
         {
-          reset_password_token: resetPasswordToken,
-          reset_password_token_expiration_at: expirationDate
-        }
+          resetPasswordToken,
+          resetPasswordTokenExpirationAt: expirationDate
+        },
+        { useFindAndModify: false }
       );
 
-      if (!process.env.CLIENT_PATH) {
+      if (process.env.CLIENT_PATH) {
         const link = `${process.env.CLIENT_PATH}/reset-password?token=${resetPasswordToken}`;
 
         const emailContent = `
-          <h1>SWATApp</h1>
+          <h1>AppName</h1>
           <p>Click <a href="${link}">here</a> to reset your password</p>
         `;
 
         await transport.sendMail({
-          to: users[0].email,
-          subject: '[SWATApp] Forget password',
+          to: user.email,
+          subject: '[AppName] Forget password',
           html: emailContent
         });
 
-        return res.status(200).json({ message: `Email sent to ${users[0].email}` });
+        return res.status(200).json({ message: `Email sent to ${user.email}` });
       }
 
       return res.status(200).json({ resetPasswordToken });
     } catch (error) {
+      console.log(error)
       next(new ErrorHandler(error.statusCode, error));
     }
   },
 
   resetPassword: async (req, res, next) => {
     try {
-      const users = await User.findBy('reset_password_token', req.body.resetPasswordToken);
+      const user = await User.findOne({ resetPasswordToken: req.body.resetPasswordToken });
 
-      if (users.length === 0) {
+      if (!user) {
         throw new GeneralError(BAD_REQUEST, 'No account corresponds to this token');
       }
 
-      if (new Date() > users[0].reset_password_token_expiration_at) {
+      if (new Date() > user.resetPasswordTokenExpirationAt) {
         throw new GeneralError(BAD_REQUEST, 'This token is no longer valid');
       }
 
-      await User.update(
-        users[0].id, 
+      await User.findByIdAndUpdate(
+        user._id, 
         {
           password: bcrypt.hashSync(req.body.password, 8),
-          reset_password_token: null,
-          reset_password_token_expiration_at: null
-        }
+          resetPasswordToken: null,
+          resetPasswordTokenExpirationAt: null
+        },
+        { useFindAndModify: false }
       );
 
       return res.status(200).json({ message: 'Password has reinitialized' });
@@ -144,11 +148,11 @@ module.exports = {
         throw new GeneralError(UNAUTHORIZED);
       }
 
-      const users = await User.findBy('email', email);
-      delete users[0].password;
+      const user = await User.findOneBy({ email });
+      delete user.password;
       
       /* TTL: 24 hours */
-      const token = jwt.sign({ ...users[0] }, process.env.JWT_SECRET, { expiresIn: 86400 });
+      const token = jwt.sign({ ...user }, process.env.JWT_SECRET, { expiresIn: 86400 });
 
       return res.status(200).json({ token, refreshToken });
     } catch (error) {

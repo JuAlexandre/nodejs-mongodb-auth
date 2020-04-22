@@ -1,5 +1,4 @@
-const User = require('../models/user.model');
-const Role = require('../models/role.model');
+const { User, Role } = require('../config/db.config');
 
 const { BAD_REQUEST, REQUIRED, INVALID, UNPROCESSABLE } = require('../errors/Errors');
 
@@ -77,7 +76,7 @@ module.exports = {
 
   checkDuplicateUsername: async (req, res, next) => {
     try {
-      const users = await User.findBy('username', req.body.username);
+      const users = await User.find({ username: req.body.username });
       if (users.length !== 0) {
         throw new FormFieldError(UNPROCESSABLE, 'username', 'Username already exists');
       }
@@ -89,7 +88,7 @@ module.exports = {
 
   checkDuplicateEmail: async (req, res, next) => {
     try {
-      const users = await User.findBy('email', req.body.email);
+      const users = await User.find({ email: req.body.email });
       if (users.length !== 0) {
         throw new FormFieldError(UNPROCESSABLE, 'email', 'Email address already exists');
       }
@@ -105,7 +104,7 @@ module.exports = {
         req.body.roles = ['user'];
       }
 
-      let roles = await Role.findAll();
+      let roles = await Role.find({});
 
       // Keep only names
       roles = roles.map(role => role.name);

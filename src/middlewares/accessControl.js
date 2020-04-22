@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const User = require('../models/user.model');
+const { User, Role } = require('../config/db.config');
 
 const { FORBIDDEN, UNAUTHORIZED } = require('../errors/Errors');
 
@@ -25,7 +25,7 @@ module.exports = {
         if (error) {
           throw new GeneralError(UNAUTHORIZED);
         }
-        req.userId = decoded.id;
+        req.userId = decoded._id;
         next();
       });
     } catch (error) {
@@ -35,13 +35,14 @@ module.exports = {
 
   isAdmin: async (req, res, next) => {
     try {
-      const users = await User.findById(req.userId);
+      const user = await User.findById(req.userId);
+      const role = await Role.findOneBy({ name: 'administrator' });
 
-      if (users.length === 0) {
+      if (!user) {
         throw new GeneralError(BAD_REQUEST, 'No account find');
       }
 
-      if (!users[0].roles.includes('administrator')) {
+      if (!user.roles.includes(role._id)) {
         throw new GeneralError(UNAUTHORIZED, 'Require Administrator permission');
       }
 
@@ -53,13 +54,14 @@ module.exports = {
   
   isModerator: async (req, res, next) => {
     try {
-      const users = await User.findById(req.userId);
+      const user = await User.findById(req.userId);
+      const role = await Role.findOneBy({ name: 'moderator' });
 
-      if (users.length === 0) {
+      if (!user) {
         throw new GeneralError(BAD_REQUEST, 'No account find');
       }
 
-      if (!users[0].roles.includes('moderator')) {
+      if (!user.roles.includes(role._id)) {
         throw new GeneralError(UNAUTHORIZED, 'Require Moderator permission');
       }
 
