@@ -1,17 +1,7 @@
-const db = require('../config/db.config').promise();
+const mongoose = require('mongoose');
 
-module.exports = {
-  findAll: async () => {
-    const connection = await db.getConnection();
+const Role = new mongoose.Schema({
+  name: String
+});
 
-    try {
-      const sql = 'SELECT * FROM roles;';
-      const [roles] = await connection.query(sql);
-      return roles;
-    } catch (error) {
-      throw error;
-    } finally {
-      await connection.release();
-    }
-  }
-};
+module.exports = mongoose.model('Role', Role);
